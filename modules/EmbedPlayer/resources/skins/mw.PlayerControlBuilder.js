@@ -495,6 +495,37 @@ mw.PlayerControlBuilder.prototype = {
 		$target = $( this.getFsTarget() ),
 		context = isIframe ? window['parent'] : window;
 
+
+		//fec-129
+
+		//iframes array TODO: pass to top level so that restoreContextPlayer will be able to access it too
+        var iframesChain = [];
+
+        //recursive function scanning parents 
+        var recursiveParent = function(tparent){
+                        var myFrame = $( tparent );
+                       if(tparent.location != tparent.parent.location)
+                       {
+                                       //this is an iframe
+                                       iframesChain.push ([myFrame , myFrame.width() , myFrame.height() ]);
+                                       console.log(' >>>>>>>>>>>>>>>>>>> inIframe '+myFrame.width() + " " + myFrame.height() );
+                                       return recursiveParent(tparent.parent);
+                       } else {
+                                       //this is not an iframe
+                                       iframesChain.push ([myFrame , myFrame.width() , myFrame.height() ]);
+                                       console.log(' >>>>>>>>>>>>>>>>>>> NOT inIframe ' +myFrame.width() + " " + myFrame.height());
+                                       return tparent;
+                       }
+        };
+        recursiveParent(window);
+        debugger;
+        //$target = iframesChain[iframesChain.length-1];
+        //return;
+
+
+
+
+
 		// update / reset local restore properties
 		this.parentsAbsoluteList = [];
 		this.parentsRelativeList = [];
