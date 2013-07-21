@@ -418,7 +418,8 @@ mw.PlayerControlBuilder.prototype = {
 		$( embedPlayer ).trigger( 'fullScreenStoreVerticalScroll' );
 
 		// Check for native support for fullscreen and we are in an iframe server
-		if( window.fullScreenApi.supportsFullScreen && !mw.isMobileChrome() ) {
+		//TODO: remove false 
+		if( window.fullScreenApi.supportsFullScreen && !mw.isMobileChrome() && false ) {
 			_this.preFullscreenPlayerSize = this.getPlayerSize();
 			var fullscreenHeight = null;
 			var fsTarget = this.getFsTarget();
