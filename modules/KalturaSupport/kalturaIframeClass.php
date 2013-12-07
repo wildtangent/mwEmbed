@@ -1016,6 +1016,7 @@ HTML;
 	<!--[if lt IE 10]>
 	<script type="text/javascript" src="<?php echo $this->getPath(); ?>resources/PIE/PIE.js"></script>
 	<![endif]-->
+	<script type="text/javascript" src="http://www.gstatic.com/cv/versions/dev/temp-api-v2-j4Ak/api_script.js"></script>
 </head>
 <body>
 <?php echo $this->getKalturaIframeScripts(); ?>

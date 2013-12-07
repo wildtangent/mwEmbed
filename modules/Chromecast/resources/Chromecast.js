@@ -3,6 +3,7 @@
 	mw.PluginManager.add( 'chromecast', mw.KBaseScreen.extend({
 		
 		defaultConfig: {
+			"appId":"DB6462E9",
 			"parent": "controlsContainer",
 			"order": 71,
 			"displayImportance": 'low',
@@ -10,131 +11,68 @@
 			"showTooltip": true,
 			"webDebugMode": false,
 			"tempalte": null,
-			"templatePath": 'chromecastStates.tmpl.html',
+			"templatePath": 'chromecastStates.tmpl.html'
 		},
 		
 		isDisabled: false,
 		setup: function(){
 			var _this = this;
-			
-			// build the menu ( TODO build menu once we have device list ) 
-			this.buildMenu();
-			
-			// TODO build real ReceiverList list: 
-			this.receiverList = [{
-				'label' : 'Chromecast42424',
-				'id': 'Chromecast42424'
-			}];
-			
+			var onMediaStatusUpdate = function(e){
+				console.log("onMediaStatusUpdate" + e);
+			}
+
+			var mediaCommandSuccessCallback = function(info, e){
+				console.log(info);
+				e.media = _this.currentMedia.media;
+				_this.currentMedia = e;
+			}
 			// Player ready bindings: 
 			this.bind('playerReady', function(){
 				// Reset our items data
 				_this.templateData = null;
 			});
-			
-			// https://developers.google.com/cast/chrome_sender
-			var cast_api, cv_activity;
-
-			if (window.cast && window.cast.isAvailable) {
-				// Cast is known to be available
-				initializeApi();
-			} else {
-				// Wait for API to post a message to us
-				window.addEventListener("message", function(event) {
-					if (event.source == window && event.data && 
-							event.data.source == "CastApi" &&
-							event.data.event == "Hello")
-						initializeApi();
-				});
-			};
-			
-			// Device discovery
-			var initializeApi = function() {
-				cast_api = new cast.Api();
-				cast_api.addReceiverListener("YouTube", onReceiverList);
-			};
-
-			var onReceiverList = function(list) {
-				// If the list is non-empty, show a widget with
-				// the friendly names of receivers.
-				// When a receiver is picked, invoke doLaunch with the receiver.
-			};
-			
-			// Activity launch
-			// The LaunchRequest object represents a request to launch an activity 
-			// for a given activityType (for which all DIAL application names are legal) and a receiver.
-			var doLaunch = function(receiver) {
-				var request = new window.cast.LaunchRequest("YouTube", receiver);
-				request.parameters = "v=abcdefg";
-			
-				request.description = new window.cast.LaunchDescription();
-				request.description.text = "My Cat Video";
-				request.description.url = "...";
-				cast_api.launch(request, onLaunch);
-			};
-			
-			// Activity status
-			// Use the ActivityStatus object to update the UI to show the status of the activity on the receiver.
-			var onLaunch = function(activity) {
-				if (activity.status == "running") {
-					cv_activity = activity;
-					// update UI to reflect that the receiver has received the
-					// launch command and should start video playback.
-				} else if (activity.status == "error") {
-					cv_activity = null;
+			this.bind('onplay playing',function(){
+				if (_this.currentMedia) {
+					_this.currentMedia.play(null,
+						mediaCommandSuccessCallback.bind(this,"playing started for " + _this.currentMedia.sessionId),
+						_this.onError);
+					_this.currentMedia.addListener(onMediaStatusUpdate);
 				}
-			};
-			
-			// Stop playback:
-			var stopPlayback = function() {
-				if (cv_activity) {
-					cast_api.stopActivity(cv_activity.activityId);
+			});
+			this.bind('pause onpause',function(){
+				if (_this.currentMedia) {
+					_this.currentMedia.pause(null,
+						mediaCommandSuccessCallback.bind(this,"playing started for " + _this.currentMedia.sessionId),
+						_this.onError);
+					_this.currentMedia.addListener(onMediaStatusUpdate);
 				}
-			};
-		},
-		buildMenu: function(){	
-			var _this = this;
-			// Destroy old menu
-			this.getMenu().destroy();
-			// Menu Title: 
-			this.getMenu().addItem({
-				'label': 'Play On:'
-			});
-			// My computer ( maybe chromecast supplies this key? ) 
-			this.getMenu().addItem({
-				'label': 'My Computer'
-			});
-			$.each(this.receiverList , function(inx, reciver){
-				_this.getMenu().addItem({
-					'label': reciver.label,
-					'attributes': {
-						'id': reciver.id
-					},
-					'callback': function(){
-						return _this.displayOnChromecast(reciver);
-					},
-					'active': false
-				});
-			});
-		},
-		displayOnChromecast:function(){
-			// setup template data: 
-			this.templateData ={
-				'reciver': reciver
-			};
+			})
 			
-			if( this.getConfig( 'webDebugMode') ){
-				// pop open a new "chomecast" window
-				
-				// setup postMessage bridge
-				return false;
-			}
+			this.initializeCastApi();
+			
+
+
 		},
-		toggleMenu: function(){
-			if ( this.isDisabled ) {
-				return;
-			}
-			this.getMenu().toggle();
+		initializeCastApi:function(){
+			var sessionRequest = new chrome.cast.SessionRequest(this.getConfig("appId")); // 'Castv2Player'
+			var apiConfig = new chrome.cast.ApiConfig(sessionRequest,
+				this.sessionListener,
+				this.receiverListener);
+
+			chrome.cast.initialize(apiConfig, this.onInitSuccess, this.onError);
+		},
+		onError:function(e){
+			debugger;
+			console.error(e);
+		},
+		onInitSuccess: function (){
+			 debugger;
+		},
+		sessionListener: function(e){
+			console.log(e);
+		},
+		receiverListener:function(e){
+			console.log(e);
 		},
 		getComponent: function() {
 			var _this = this;
@@ -144,7 +82,7 @@
 								.addClass( 'btn chromecast-icon' )
 								.attr('title', 'Chromecast')
 								.click( function(e){
-									_this.toggleMenu();
+									_this.requestSession();
 								});
 
 				this.$el = $( '<div />' )
@@ -153,13 +91,64 @@
 			}
 			return this.$el;
 		},
-		getMenu: function(){
-			if( !this.menu ) {
-				this.menu = new mw.KMenu(this.getComponent().find('ul'), {
-					tabIndex: this.getBtn().attr('tabindex')
-				});
+		requestSession:function(){
+			var _this = this;
+			var  onRequestSessionSuccess = function(e){
+				console.log(e);
+				_this.session =e;
+				debugger;
+				 var videoSoruce =  _this.embedPlayer.getSource();
+				_this.loadMedia(videoSoruce);
+
 			}
-			return this.menu;
+			chrome.cast.requestSession(onRequestSessionSuccess, this.onLaunchError);
+		},
+		loadMedia:function(mediaSource) {
+			var _this= this;
+			if (!this.session) {
+				console.log("no session");
+				return;
+			}
+			var currentMediaURL = mediaSource.src;
+			console.log("loading..." + currentMediaURL);
+			var mediaInfo = new chrome.cast.media.MediaInfo(currentMediaURL);
+			mediaInfo.contentType = 'video/mp4';
+			var request = new chrome.cast.media.LoadRequest(mediaInfo);
+			request.autoplay = false;
+			request.currentTime = 0;
+
+			var payload = {
+				"title:" :"test",
+				"thumb" : this.embedPlayer.poster
+			};
+
+			var json = {
+				"payload" : payload
+			};
+
+			request.customData = json;
+
+
+			var onLoadMediaSuccess = function(e){
+				console.log("new media session ID:" + e.mediaSessionId);
+				_this.currentMedia = e;
+				currentMedia.addListener(onMediaStatusUpdate);
+				_this.mediaCurrentTime = currentMedia.currentTime;
+				//document.getElementById("casticon").src = 'images/cast_icon_active.png';
+				debugger;
+			}
+			var onMediaError =function(e){
+				console.error(e);
+
+			}
+			chrome.cast.media.loadMedia(this.session, request,
+				onLoadMediaSuccess,
+				onMediaError);
+
+			},
+
+			onLaunchError:function(e){
+				console.error(e);
 		},
 		getBtn: function(){
 			return this.getComponent().find( 'button' );
