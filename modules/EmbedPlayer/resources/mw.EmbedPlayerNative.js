@@ -904,7 +904,7 @@ mw.EmbedPlayerNative = {
 		var _this = this;
 		// if starting playback from stoped state and not in an ad or otherise blocked controls state:
 		// restore player:
-		if( this.isStopped() && this._playContorls ){
+		if( this.isStopped() && this._playContorls && !vid.linkedPlayer ){
 			this.restorePlayerOnScreen();
 		}
 
@@ -920,7 +920,7 @@ mw.EmbedPlayerNative = {
 				// make sure the video tag is displayed:
 				$( this.getPlayerElement() ).show();
 				// Remove any poster div ( that would overlay the player )
-				if( ! _this.isAudio() ) {
+				if( ! _this.isAudio() && !vid.linkedPlayer ) {
 					$( this ).find( '.playerPoster' ).remove();
 				}
 				// if using native controls make sure the inteface does not block the native controls interface:
@@ -1031,7 +1031,9 @@ mw.EmbedPlayerNative = {
 	* Get /update the playerElement value
 	*/
 	getPlayerElement: function () {
-		this.playerElement = $( '#' + this.pid ).get( 0 );
+		if (!this.playerElement) {
+			this.playerElement = $( '#' + this.pid ).get( 0 );
+		}
 		return this.playerElement;
 	},
 

@@ -31,22 +31,13 @@
 				// Reset our items data
 				_this.templateData = null;
 			});
-			this.bind('onplay playing',function(){
-				if (_this.currentMedia) {
-					_this.currentMedia.play(null,
-						mediaCommandSuccessCallback.bind(this,"playing started for " + _this.currentMedia.sessionId),
-						_this.onError);
-					_this.currentMedia.addListener(onMediaStatusUpdate);
-				}
+			this.bind('playing',function(){
+				_this.isPlaying = true;
 			});
-			this.bind('pause onpause',function(){
-				if (_this.currentMedia) {
-					_this.currentMedia.pause(null,
-						mediaCommandSuccessCallback.bind(this,"playing started for " + _this.currentMedia.sessionId),
-						_this.onError);
-					_this.currentMedia.addListener(onMediaStatusUpdate);
-				}
-			})
+			this.bind('pause',function(){
+				_this.isPlaying = false;
+			});
+
 			
 			this.initializeCastApi();
 			
@@ -105,6 +96,9 @@
 		},
 		loadMedia:function(mediaSource) {
 			var _this= this;
+			var onMediaStatusUpdate = function(e){
+				console.log("onMediaStatusUpdate" + e);
+			}
 			if (!this.session) {
 				console.log("no session");
 				return;
@@ -116,7 +110,11 @@
 			var request = new chrome.cast.media.LoadRequest(mediaInfo);
 			request.autoplay = false;
 			request.currentTime = 0;
-
+			debugger;
+			if (this.isPlaying)  {
+				request.currentTime = this.getPlayer().currentTime;
+				_this.getPlayer().sendNotification('doPause');
+			}
 			var payload = {
 				"title:" :"test",
 				"thumb" : this.embedPlayer.poster
@@ -132,9 +130,17 @@
 			var onLoadMediaSuccess = function(e){
 				console.log("new media session ID:" + e.mediaSessionId);
 				_this.currentMedia = e;
-				currentMedia.addListener(onMediaStatusUpdate);
-				_this.mediaCurrentTime = currentMedia.currentTime;
+				_this.currentMedia.addListener(onMediaStatusUpdate);
+				_this.mediaCurrentTime = _this.currentMedia.currentTime;
 				//document.getElementById("casticon").src = 'images/cast_icon_active.png';
+				_this.getPlayer().updatePosterHTML();
+
+				_this.getPlayer().playerElement = new mw.PlayerElementCast();
+				_this.getPlayer().playerElement.init(_this.currentMedia);
+				_this.getPlayer().applyMediaElementBindings();
+				if (_this.isPlaying){
+					_this.getPlayer().sendNotification('doPlay');
+				}
 				debugger;
 			}
 			var onMediaError =function(e){

@@ -1947,7 +1947,8 @@
 			}
 
 			// Remove any poster div ( that would overlay the player )
-			this.removePoster();
+			if (this.playerElement && !this.playerElement.linkedPlayer)
+				this.removePoster();
 
 			// We need first play event for analytics purpose
 			if( this.firstPlay && this._propagateEvents) {

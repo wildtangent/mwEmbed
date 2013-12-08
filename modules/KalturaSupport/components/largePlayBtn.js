@@ -58,11 +58,11 @@
 		},
 		clickButton: function( event ){
 			// If link player, only trigger events
-			if( this.getPlayer().isLinkPlayer() ) {
-				this.getPlayer().triggerHelper( 'firstPlay' ); // To send stats event for play
-				this.getPlayer().triggerHelper( 'playing' );
-				return;
-			}
+//			if( this.getPlayer().isLinkPlayer() ) {
+//				this.getPlayer().triggerHelper( 'firstPlay' ); // To send stats event for play
+//				this.getPlayer().triggerHelper( 'playing' );
+//				return;
+//			}
 
 			event.preventDefault();
 			this.getPlayer().sendNotification('doPlay');

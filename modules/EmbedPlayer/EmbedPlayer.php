@@ -63,6 +63,7 @@
 
 					'mw.PlayerElementHTML',
 					'mw.PlayerElementFlash',
+					'mw.PlayerElementCast'
 				),
 				'styles' => "resources/EmbedPlayer.css",
 				'messageFile' => 'EmbedPlayer.i18n.php',
@@ -100,5 +101,9 @@
 				'scripts' => 'resources/playerElement/mw.PlayerElementFlash.js',
 				'dependencies' =>  array( 'mw.PlayerElement' )
 			),
+			"mw.PlayerElementCast" => array(
+            				'scripts' => 'resources/playerElement/mw.PlayerElementCast.js',
+            				'dependencies' =>  array( 'mw.PlayerElement' )
+            			),
 	);
 ?>
