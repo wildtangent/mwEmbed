@@ -145,7 +145,7 @@ return array(
 			"statistics" => "",
 			"akamaiMediaAnalytics" => "",
 			"googleAnalytics" => "",
-			"nielsenVideoCensus" => "",
+			//"nielsenVideoCensus" => "",
 			"comscore" => "",
 			"nielsenCombined" => "",
 			"omnitureOnPage" => ""

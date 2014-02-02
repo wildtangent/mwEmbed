@@ -159,10 +159,10 @@
 							'title' => 'Google Analytics',
 							'path' => 'GoogleAnalytics/tests/GoogleAnalytics.qunit.html',
 						),
-						'NielsenVideoCensus' => array(
+						/*'NielsenVideoCensus' => array(
 							'title' => 'Nielsen VideoCensus',
 							'path' => 'NielsenVideoCensus/tests/ShortFromNielsenVideoCensus.html',
-						),
+						),*/
 						'ComscoreAnalytics' => array(
 							'title' => 'Comscore Analytics',
 							'path' => 'Comscore/tests/Comscore.html',
