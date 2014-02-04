@@ -514,12 +514,14 @@ The playhead reflects segment time as if it was the natural stream length.",
                 'label' => 'Image URL', // *NEW*
                 'model' => 'config.plugins.watermark.img',
                 'doc' => "Url path to watermark image",
+                'initvalue' => 'http://www.kaltura.com/content/uiconf/kaltura/kmc/appstudio/kdp3/exampleWatermark.png',
                 'type' => 'url' //URL input validation still not implemented but very easy in anuglar - renders as text.
             ),
             'watermarkClickPath' => array(
                 'label' => 'Click URL', // *NEW*
                 'model' => 'config.plugins.watermark.href',
                 'doc' => "Url for watermark click",
+                'initvalue' =>'http://www.kaltura.com/',
                 'type' => 'url'
             ),
             'padding' => array(
