@@ -7,9 +7,8 @@
 <div id="kaltura_player" style="width:400px;height:330px;"></div>
 <script>
 
-    //                                  Coffee      Indian      Dino
-    var myEntryId = "0_uka1msg4"; //    0_uka1msg4  0_53bc5gbe  1_whkdbnzd
 
+    var myEntryId;
     //mw.setConfig("Kaltura.LeadWithHTML5",true);
     kWidget.getIframeUrl = function(){
         return 'resources/frameResponse.js';
@@ -18,14 +17,14 @@
         'targetId': 'kaltura_player',
         'wid': '_243342',
         'uiconf_id' : '12905712',
-        'entry_id' : this.myEntryId,
+        //'entry_id' : this.myEntryId,
         'flashvars': {
 
         }
     });
     var _this = this;
-    function jsCallbackReady(a){
-       // return;
+    function jsCallbackReady(){
+        return;
         var myPlayer = document.getElementById("kaltura_player");
         myPlayer.kBind("playerReady" , function(){
             myPlayer.sendNotification("changeMedia",{entryId:_this.myEntryId});
