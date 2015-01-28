@@ -155,7 +155,6 @@
 			}
 
 			$(this.proxyElement).trigger(eventName, [jsEventValue]);
-
 			if (this.subscribed[eventName]) {
 				this.subscribed[eventName](jsEventValue);
 			}
@@ -172,6 +171,9 @@
 		},
 		log: function (message, arg) {
 			console.log(message, arg);
+		},
+		getVideoHolderHeight: function () {
+			return this.embedPlayer.getVideoHolder().height();
 		},
 
 		stringConvertion: function (str) {
