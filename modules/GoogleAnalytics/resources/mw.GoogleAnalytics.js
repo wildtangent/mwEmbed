@@ -28,7 +28,7 @@
 		_lastPlayHeadTime: 0,
 
 		// Google Analytics Version
-		_googleAnalyticsVersion: "classic",
+		_googleAnalyticsVersion: "universal",
 
 		// last seek:
 		_lastSeek: 0,
