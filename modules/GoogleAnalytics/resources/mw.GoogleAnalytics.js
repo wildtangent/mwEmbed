@@ -27,6 +27,9 @@
 		// Local variables:
 		_lastPlayHeadTime: 0,
 
+		// Google Analytics Version
+		_googleAnalyticsVersion: "classic",
+
 		// last seek:
 		_lastSeek: 0,
 
@@ -94,22 +97,60 @@
 			this._p100Once = false;
 			this.hasSeeked = false;
 			this.lastSeek = 0;
-			window._gaq = window._gaq || [];
-			window._gaq.push([ '_setAccount', _this.getConfig('urchinCode') ]);
-			if (mw.getConfig('debug')) {
-				window._gaq.push([ '_setDomainName', 'none' ]);
-				window._gaq.push([ '_setAllowLinker', true ]);
-			}
-			window._gaq.push([ '_trackPageview' ]);
-			var ga = document.createElement('script');
-			ga.type = 'text/javascript';
-			ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0];
-			s.parentNode.insertBefore(ga, s);
 
+			if(this._googleAnalyticsVersion == "universal"){
+		    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		    // Setup default options for GA
+				var options = {
+					'name': _this.getConfig('gaNamespace'),
+					'sampleRate': 100
+			  };
+
+			  // Add cookiedomain none if debugging
+			  if(mw.getConfig('debug')){
+			  	options.cookieDomain = 'none';
+			  }
+
+			  // Create Google tag
+				window.ga('create', _this.getConfig('urchinCode'), 'auto', options);
+
+				// Setup linker if debugging
+				if (mw.getConfig('debug')) {
+					window.ga(this.trackerNamespace('require'), 'linker');
+				}
+
+				window.ga(this.trackerNamespace('send'), 'pageview');
+
+			}else{
+				window._gaq = window._gaq || [];
+				window._gaq.push([ '_setAccount', _this.getConfig('urchinCode') ]);
+				if (mw.getConfig('debug')) {
+					window._gaq.push([ '_setDomainName', 'none' ]);
+					window._gaq.push([ '_setAllowLinker', true ]);
+				}
+				window._gaq.push([ '_trackPageview' ]);
+				var ga = document.createElement('script');
+				ga.type = 'text/javascript';
+				ga.async = true;
+				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+				var s = document.getElementsByTagName('script')[0];
+				s.parentNode.insertBefore(ga, s);
+			}
 			this.addPlayerBindings();
 			callback();
+		},
+
+		trackerNamespace: function(eventName){
+			var ns = this.getConfig('gaNamespace') || '';
+			if(ns.length > 0){
+				return [ns, eventName].join(',');
+			} else {
+				return eventName;
+			}
 		},
 
 		// Add the player bindings
@@ -173,16 +214,29 @@
 				// Passing an array to this function doesn't seem to work. Besides, have to make sure first three args are strings and last one is integer
 				this.googlePageTracker._trackEvent(trackingArgs[0], trackingArgs[1], trackingArgs[2], trackingArgs[3]);
 			} else {
-				var gaqAry = trackingArgs.slice(0);
-				gaqAry.unshift("_trackEvent");
-				window._gaq.push(gaqAry);
+		  	var gaqAry = trackingArgs.slice(0);
+
+				if (window.ga){
+					// Using Universal Analytics
+					window.ga(this.trackerNamespace('send'), {
+						'hitType': 'event',
+						'eventCategory': gaqAry[0],
+						'eventAction': gaqAry[1],
+						'eventLabel': gaqAry[2],
+						'eventValue': gaqAry[3]
+					});
+				}else{
+					// Using Classic Analytics
+	  			gaqAry.unshift("_trackEvent");
+					window._gaq.push(gaqAry);
+				}
 			}
 			// Send the event to the monitor ( if set in the initial options )
 			if (this.getConfig('trackEventMonitor')) {
 				try {
 					window.parent[ this.getConfig('trackEventMonitor') ].apply(this, trackingArgs);
 				} catch (e) {
-					// error sending tracking event. 
+					// error sending tracking event.
 					mw.log("Error with google track event: " + e);
 				}
 
